@@ -1,0 +1,7 @@
+name: astrbot_plugin_workgroup
+display_name: 多 Bot 工作群协作
+desc: 多 AstrBot 实例工作群，自动分工、Bot 讨论、共享知识库与逐 Bot 思考强度滑动栏
+version: 0.6.2
+author: community
+repo: ""
+astrbot_version: ">=4.16,<5"

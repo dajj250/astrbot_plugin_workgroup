@@ -1,0 +1,16 @@
+{
+  "work_group_id": {"description": "唯一工作群 QQ 群号；留空时不接管群聊", "type": "string", "default": ""},
+  "owner_qq_id": {"description": "主要管理员 QQ 号；只有此账号可切换模式、管理知识和启停协作", "type": "string", "default": ""},
+  "coordinator_bot_id": {"description": "协调 Bot 的 QQ 号；所有实例填写同一个", "type": "string", "default": ""},
+  "bot_roster": {"description": "Bot 能力表 JSON；留空则根据已接入 Bot 的模型及公开 Arena 榜单自动分配", "type": "text", "default": "{}"},
+  "bot_ids": {"description": "自动发现模式下允许加入的 Bot QQ 号，逗号分隔；留空则凭共享密钥加入", "type": "string", "default": ""},
+  "protocol_secret": {"description": "工作群内部协议共享密钥；所有实例填写相同随机长字符串，请勿发到群里", "type": "string", "default": ""},
+  "transport_mode": {"description": "Bot 之间心跳和任务消息的传输方式", "type": "string", "default": "local", "options": ["local", "auto", "group"], "hint": "local=仅本机后台，失败不向群发送 [WG]；auto=本机优先，旧版兼容时可能回退群消息；group=旧行为，群内可见"},
+  "local_channel_dir": {"description": "本机后台通道目录；AstrBot Launcher 同机实例自动共用，其他部署需指定同一路径", "type": "string", "default": ""},
+  "proactive_mode": {"description": "协调 Bot 的回复范围", "type": "string", "default": "relevant", "options": ["off", "mention_only", "relevant", "always"], "hint": "relevant=自动识别任务；always=普通聊天也回复；mention_only=仅被唤醒；off=只处理管理员指令和内部协议"},
+  "discussion_enabled": {"description": "任务执行前让参与 Bot 讨论分工；等待意见最多约 20 秒", "type": "bool", "default": false},
+  "share_task_knowledge": {"description": "把完成的子任务结论写入共享知识库并同步给其他 Bot", "type": "bool", "default": true},
+  "task_timeout_sec": {"description": "子任务超时秒数，20 到 900", "type": "int", "default": 120},
+  "max_attempts": {"description": "子任务最多尝试次数，1 到 5", "type": "int", "default": 3},
+  "task_store": {"description": "本实例任务记录路径；留空使用 AstrBot 的 data/plugin_data/astrbot_plugin_workgroup/tasks.json", "type": "string", "default": ""}
+}
