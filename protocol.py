@@ -10,7 +10,10 @@ import time
 from typing import Any
 
 PREFIX = "[WG] "
-TYPES = {"task", "claim", "result", "error", "cancel", "hello", "proposal", "opinion", "glossary", "knowledge", "effort_sync"}
+TYPES = {"task", "claim", "result", "error", "cancel", "hello", "proposal", "opinion",
+         "glossary", "knowledge", "effort_sync", "mode_sync", "collaboration_sync",
+         "scene_sync", "scene_update", "agent_sync", "agent_update",
+         "settings_sync", "settings_update", "sync_request", "status_sync"}
 MAX_WIRE_BYTES = 12000
 MAX_AGE_SECONDS = 900
 

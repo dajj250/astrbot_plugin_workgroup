@@ -4,77 +4,75 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <title>工作群控制台</title>
+  <title>场景工作台</title>
   <link rel="stylesheet" href="./style.css">
   <script src="./app.js" defer></script>
 </head>
 <body>
-  <div class="shell">
-    <header class="topbar">
-      <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>WORKGROUP <small>/ 多 Bot 协作</small></span></div>
-      <div class="top-actions"><span id="updated" class="muted">等待连接</span><button id="refresh" type="button">刷新数据 <span aria-hidden="true">↗</span></button></div>
-    </header>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-glyph">工</span><div><strong>场景工作台</strong><small>ASTRBOT WORKGROUP</small></div></div>
+      <nav aria-label="工作台导航">
+        <button class="nav-item active" data-view="overview"><span>⌂</span>总览</button>
+        <button class="nav-item" data-view="scenes"><span>◫</span>场景</button>
+        <button class="nav-item" data-view="projects"><span>◇</span>项目</button>
+        <button class="nav-item" data-view="memory"><span>≋</span>记忆与交接</button>
+        <button class="nav-item" data-view="collaboration"><span>◎</span>协作记录</button>
+        <button class="nav-item" data-view="settings"><span>⚙</span>设置</button>
+      </nav>
+      <div class="sidebar-foot"><div><span id="connection-dot" class="dot"></span><span id="connection-text">正在连接</span></div><small id="instance-label">当前实例 · —</small></div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <div><span class="crumb">工作群 / <b id="view-title">总览</b></span><h1 id="page-title">今天要推进什么？</h1></div>
+        <div class="top-actions"><span id="updated">等待更新</span><button id="refresh">刷新</button></div>
+      </header>
+      <div id="notice" class="notice">正在读取工作台…</div>
 
-    <main>
-      <section class="hero">
-        <div class="hero-copy">
-          <div class="eyebrow">ASTRBOT · COLLABORATION CONSOLE</div>
-          <h1>一个工作群，<br><em>多个 Bot 各司其职。</em></h1>
-          <p>查看协作状态、共享知识、工作日志与模型用量。群内管理指令只接受主要管理员。</p>
-          <div class="hero-meta"><span id="status-pill" class="pill">读取中</span><span id="group-meta">群号 · —</span><span id="self-meta">当前实例 · —</span></div>
+      <section class="view active" data-page="overview">
+        <details class="usage-guide" open><summary><span><b>第一次使用？</b> 按这四步完成场景工作台</span><span>收起提示</span></summary><div class="guide-steps"><div><i>1</i><span><b>建场景栏</b><small>绑定主 Bot，填写负责什么与不碰什么。</small></span></div><div><i>2</i><span><b>核对代理栏</b><small>AstrBot 子代理会本机自动同步，也可手动添加。</small></span></div><div><i>3</i><span><b>调两套强度</b><small>分别选择工作时、休闲时的思考投入。</small></span></div><div><i>4</i><span><b>发 /任务 并体检</b><small>项目、派单、回执和证据会自动入栏。</small></span></div></div><div id="integration-status" class="integration-status"></div></details>
+        <section class="control-dock"><div class="control-title"><span class="pulse"></span><div><b>协调操作栏</b><small id="control-role-note">正在识别控制权限</small></div></div><div class="control-group"><span>全群模式</span><div class="segmented"><button id="control-mode-work">工作</button><button id="control-mode-chat">休闲</button></div></div><div class="control-group"><span>多 Bot 协作</span><div class="segmented"><button id="control-collab-on">开启</button><button id="control-collab-off">关闭</button></div></div><div class="control-group"><span>协调人格</span><select id="control-persona"><option value="clean">去人格工作</option><option value="preserve">保留人格工作</option></select></div><button id="control-sync" class="dock-button">同步工作区</button><button id="channel-repair" class="dock-button">一键修复内部通道</button><button id="health-run" class="dock-button ghost">运行体检</button></section>
+        <section class="diagnostic-panel"><div><b>完整环境检测</b><small>检查 QQ 登录、内部通道、模型供应商、任务审核和插件联动；模型测试会使用少量 Token。</small></div><button id="diagnostics-run" class="dock-button">一键完成检测</button></section><div id="diagnostic-results" class="diagnostic-results"></div>
+        <div class="status-strip"><div><span class="pulse"></span><strong id="system-status">读取中</strong><small id="system-detail">正在检查配置和协作通道</small></div><div class="mode-chip" id="mode-chip">—</div></div>
+        <div class="metric-grid">
+          <article><span>活跃场景</span><strong id="metric-scenes">—</strong><small>各自有职责与边界</small></article>
+          <article><span>进行中项目</span><strong id="metric-projects">—</strong><small>owner 明确的工作</small></article>
+          <article><span>待处理任务</span><strong id="metric-running">—</strong><small>执行或等待验收</small></article>
+          <article><span>闭环回执</span><strong id="metric-receipts">—</strong><small>带结论与证据</small></article>
         </div>
-        <div class="orbit" aria-hidden="true"><span class="orbit-ring orbit-ring-a"></span><span class="orbit-ring orbit-ring-b"></span><span class="orbit-core">WG</span><span class="orbit-node node-a"></span><span class="orbit-node node-b"></span><span class="orbit-node node-c"></span></div>
+        <div class="dashboard-grid">
+          <section class="card span-2"><div class="card-head"><div><span class="kicker">SCENES</span><h2>场景分工</h2></div><button class="text-button" data-go="scenes">管理场景 →</button></div><div id="scene-preview" class="scene-grid"></div></section>
+          <section class="card health-card"><div class="card-head"><div><span class="kicker">HEALTH</span><h2>机制体检</h2></div><span id="health-badge" class="badge">—</span></div><div id="health-summary" class="health-summary"></div><div id="health-issues" class="issue-list"></div></section>
+          <section class="card span-2"><div class="card-head"><div><span class="kicker">PROJECTS</span><h2>正在推进</h2></div><button class="text-button" data-go="projects">查看项目 →</button></div><div id="project-preview" class="project-list"></div></section>
+          <section class="card"><div class="card-head"><div><span class="kicker">ACTIVITY</span><h2>最近动态</h2></div></div><div id="audit-preview" class="timeline"></div></section>
+        </div>
       </section>
 
-      <div id="notice" class="notice" role="status">正在连接 AstrBot 插件视图…</div>
+      <section class="view" data-page="scenes"><div class="page-actions"><p>一个 Bot 对应一个工作场景。职责、边界和口吻都在这里维护。</p><button id="new-scene">＋ 新建场景</button></div><div id="scene-list" class="scene-grid full"></div></section>
 
-      <details id="settings-panel" class="panel settings-panel">
-        <summary><span><span class="eyebrow">CONFIGURATION</span><strong>工作群配置</strong><small>在此编辑并保存当前 AstrBot 实例</small></span><span>展开设置 ▾</span></summary>
-        <form id="settings-form" autocomplete="off">
+      <section class="view" data-page="projects"><div class="page-actions"><div class="segmented"><button class="active" data-project-filter="open">进行中</button><button data-project-filter="done">已完成</button><button data-project-filter="archived">归档</button><button data-project-filter="all">全部</button></div><button id="new-project">＋ 新建项目</button></div><div id="project-list" class="project-list full"></div></section>
+
+      <section class="view" data-page="memory"><div class="page-intro"><span class="kicker">MEMORY IN FILES</span><h2>记忆不押在聊天记录里</h2><p>每个场景保留一份短交接：当前项目、关键变化、下一步和卡点。交接控制在 4 KB 内。</p></div><div id="memory-list" class="memory-grid"></div></section>
+
+      <section class="view" data-page="collaboration">
+        <div class="metric-grid compact"><article><span>登记 Bot</span><strong id="collab-bots">—</strong></article><article><span>在线成员</span><strong id="collab-peers">—</strong></article><article><span>累计任务</span><strong id="collab-tasks">—</strong></article><article><span>Token 调用</span><strong id="collab-calls">—</strong></article></div>
+        <div class="dashboard-grid two"><section class="card"><div class="card-head"><div><span class="kicker">TASK FLOW</span><h2>任务与子任务</h2></div></div><div id="task-list" class="task-list"></div></section><section class="card"><div class="card-head"><div><span class="kicker">RECEIPTS</span><h2>回执台账</h2></div></div><div id="receipt-list" class="receipt-list"></div></section><section class="card"><div class="card-head"><div><span class="kicker">KNOWLEDGE</span><h2>共享知识</h2></div></div><div id="knowledge-list" class="plain-list"></div></section><section class="card"><div class="card-head"><div><span class="kicker">LOGS</span><h2>运行日志</h2></div></div><div id="log-list" class="plain-list logs"></div></section></div>
+      </section>
+
+      <section class="view" data-page="settings">
+        <section class="settings-card instance-card"><div class="card-head"><div><span class="kicker">INSTANCE CONTROL</span><h2>Bot 公开运行设置</h2><p>协调 Bot 可控制所有实例；成员只能修改自己。密钥、路径与私有交接不会同步。</p></div></div><div id="instance-settings-list" class="instance-settings-list"></div></section>
+        <form id="settings-form" class="settings-card" autocomplete="off">
+          <div class="card-head"><div><span class="kicker">PRIVATE CONNECTION</span><h2>当前实例的私有连接设置</h2><p>这里只保留连接、路径和密钥，避免与上方运行设置重复。</p></div><button id="save-settings" type="submit">保存并应用</button></div>
           <div class="settings-grid">
-            <label>工作群 QQ 群号<input name="work_group_id" inputmode="numeric" placeholder="例如 123456789"></label>
-            <label>主要管理员 QQ 号<input name="owner_qq_id" inputmode="numeric"></label>
-            <label>协调 Bot QQ 号<input name="coordinator_bot_id" inputmode="numeric"></label>
-            <label>允许加入的 Bot QQ 号<input name="bot_ids" placeholder="逗号分隔；留空则凭密钥加入"><small>仅自动发现模式使用。</small></label>
-            <label>共享密钥<input name="protocol_secret" type="password" autocomplete="new-password" placeholder="至少 16 个字符"><small id="secret-state">留空保持已有密钥；多个实例须填写相同密钥。</small></label>
-            <label>回复范围<select name="proactive_mode"><option value="off">关闭主动回复</option><option value="mention_only">仅被唤醒</option><option value="relevant">识别工作任务</option><option value="always">所有消息</option></select></label>
-            <label>内部消息通道<select name="transport_mode"><option value="local">本机后台（群内隐藏）</option><option value="auto">自动兼容旧版</option><option value="group">群消息（可见）</option></select><small>三个同机实例都选“本机后台”。</small></label>
-            <label>后台共享目录<input name="local_channel_dir" placeholder="留空自动使用 AstrBot Launcher 共用目录"><small>跨设备或非 Launcher 安装时，请在各实例填写同一个可访问目录。</small></label>
-            <label>子任务超时（秒）<input name="task_timeout_sec" type="number" min="20" max="900" step="1"></label>
-            <label>最多尝试次数<input name="max_attempts" type="number" min="1" max="5" step="1"></label>
-            <label class="settings-wide">Bot 能力表 JSON<textarea name="bot_roster" rows="6" spellcheck="false" placeholder="{}"></textarea><small>填 {} 自动发现并参考公开榜单；手动填写时请在所有实例使用相同内容。</small></label>
-            <label class="settings-wide">任务记录路径<input name="task_store" placeholder="留空使用 AstrBot 默认路径"><small>修改路径后需重载当前插件才能切换存储位置。</small></label>
-            <label class="check"><input name="discussion_enabled" type="checkbox">任务开始前让 Bot 讨论分工</label>
-            <label class="check"><input name="share_task_knowledge" type="checkbox">自动共享已完成的任务结论</label>
-          </div>
-          <div class="settings-actions"><span id="settings-feedback" role="status">每个 AstrBot 实例分别保存一次。</span><button id="save-settings" type="submit">保存并应用</button></div>
+            <label>工作群 QQ 群号<input name="work_group_id" inputmode="numeric"></label><label>主要管理员 QQ 号<input name="owner_qq_id" inputmode="numeric"></label><label>协调 Bot QQ 号<input name="coordinator_bot_id" inputmode="numeric"></label><label>允许加入的 Bot<input name="bot_ids" placeholder="逗号分隔；可留空"></label>
+            <label>内部传输方式<select name="transport_mode"><option value="auto">自动内部通道（推荐）</option><option value="local">强制本机内部通道</option></select><small>WG 协议不会发送到 QQ 群。</small></label>
+            <label class="wide">本机共享通道目录<input name="local_channel_dir" placeholder="三个实例必须填写同一个绝对路径"><small>例如 C:\Users\用户名\Desktop\工作区\astrbot_workgroup_channel</small></label><label class="wide">工作站文件夹<input name="workstation_dir" placeholder="可选：只读取顶层文件名作为背景"></label>
+            <label class="wide">Bot 能力表 JSON<textarea name="bot_roster" rows="7" spellcheck="false">{}</textarea></label><label class="wide">任务记录路径<input name="task_store" placeholder="留空使用 AstrBot 默认路径"></label><label class="wide">共享密钥<input name="protocol_secret" type="password" autocomplete="new-password" placeholder="留空保持已有密钥"><small id="secret-state"></small></label>
+          </div><div id="settings-feedback" class="form-feedback">尚未保存。</div>
         </form>
-      </details>
-
-      <section class="stats" aria-label="任务统计">
-        <article class="stat"><span>参与 Bot</span><strong id="bot-count">—</strong><small>已登记的协作成员</small></article>
-        <article class="stat"><span>进行中</span><strong id="running-count">—</strong><small>等待执行或汇总</small></article>
-        <article class="stat"><span>已完成</span><strong id="done-count">—</strong><small>最近 50 条任务</small></article>
-        <article class="stat"><span>部分完成</span><strong id="partial-count">—</strong><small>含失败的子任务</small></article>
       </section>
-
-      <div class="grid">
-        <section class="panel task-panel">
-          <div class="section-head"><div><span class="eyebrow">TASK FLOW</span><h2>任务流</h2></div><div class="filters" role="group" aria-label="筛选任务"><button type="button" data-filter="all" class="active">全部</button><button type="button" data-filter="running">进行中</button><button type="button" data-filter="done">已完成</button></div></div>
-          <div id="tasks" class="task-list"><div class="empty">正在读取任务…</div></div>
-        </section>
-        <aside class="side">
-          <section class="panel roster-panel"><div class="section-head"><div><span class="eyebrow">WORK MODE</span><h2>工作模式 · AI 智商调节</h2></div><span id="mode" class="minor-tag">—</span></div><p class="roster-note">控制协作任务的思考强度，请在协调 Bot 实例调整。共 5 档：快速、精简、标准、深入、复核。复核档多调用一次模型；滑动值不会改变模型本身的能力。</p><div id="bots" class="bot-list"><div class="empty">正在读取成员…</div></div></section>
-          <section class="panel control-panel"><span class="eyebrow">OWNER CONTROL</span><h2>主要管理员控制</h2><p>主要管理员在群内发送；不 @ 时切换整个工作群，@单个 Bot 时只切换该 Bot：</p><div class="command"><code>/工作</code><span>切到工作模式</span></div><div class="command"><code>/聊天</code><span>切到聊天模式</span></div><div class="command"><code>@Bot /工作</code><span>只切换指定 Bot</span></div><div class="command"><code>/work stop</code><span>暂停协作</span></div><div class="command"><code>/work start</code><span>恢复协作</span></div><div class="command"><code>/知识库 添加 标题=内容</code><span>共享知识</span></div><div class="command"><code>/黑话 添加 词语=解释</code><span>共享词汇</span></div><div class="owner">主要管理员 QQ <strong id="owner-id">—</strong></div></section>
-        </aside>
-      </div>
-      <section class="panel normal-panel"><div class="section-head"><div><span class="eyebrow">NORMAL MODE</span><h2>常态模式 · AI 智商调节</h2></div><span id="normal-review-count" class="minor-tag">—</span></div><p class="roster-note">用于普通聊天，不影响工作任务。旧配置默认不启用；首次移动滑动栏后开启，点“恢复原样”可关闭。协调 Bot 实例会把设置同步给其他 Bot；离线时等下次工作群消息再同步。第 5 档对普通纯文本额外复核一次。</p><div id="normal-bots" class="normal-bot-grid"></div></section>
-      <div class="grid details-grid">
-        <section class="panel"><div class="section-head"><div><span class="eyebrow">SHARED KNOWLEDGE</span><h2>共享知识库</h2></div><span id="knowledge-count" class="minor-tag">—</span></div><div id="knowledge" class="detail-list"></div><h3 class="subheading">群内黑话</h3><div id="glossary" class="detail-list"></div></section>
-        <section class="panel"><div class="section-head"><div><span class="eyebrow">ACTIVITY LOG</span><h2>工作日志</h2></div><span id="log-count" class="minor-tag">—</span></div><div id="logs" class="detail-list"></div><p id="source-note" class="source-note"></p></section>
-      </div>
     </main>
-    <footer>WORKGROUP / ASTRBOT PLUGIN VIEW <span>仅展示当前实例的数据 · 每 8 秒自动刷新</span></footer>
   </div>
+  <dialog id="editor-dialog"><form id="editor-form" method="dialog"><div class="dialog-head"><div><span id="editor-kicker" class="kicker">EDIT</span><h2 id="editor-title">编辑</h2></div><button type="button" id="editor-close" class="icon-button">×</button></div><div id="editor-fields" class="editor-fields"></div><div class="dialog-actions"><span id="editor-feedback"></span><button type="button" id="editor-cancel" class="ghost">取消</button><button type="submit">保存</button></div></form></dialog>
 </body>
 </html>
