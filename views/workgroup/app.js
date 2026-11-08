@@ -151,9 +151,17 @@ function renderInstanceSettings() {
   if (!target.children.length) target.append(empty("实例连接后会显示公开运行设置。"));
 }
 
+function renderComputerControl() {
+  const status = workbench.computer_control || {}; const note = $("computer-status");
+  const authorize = $("computer-authorize"); const disable = $("computer-disable");
+  if (status.active) { const remain = Math.max(1, Math.ceil((Number(status.expires_at || 0) - Date.now() / 1000) / 60)); note.textContent = `已授权，约剩 ${remain} 分钟；仅开放 ${status.runtime || "CUA 沙箱"}。`; }
+  else note.textContent = status.enabled ? "功能已开启，当前等待主要管理员临时授权。" : "功能未开启；请先在设置中开启。";
+  authorize.disabled = !status.enabled || !isCoordinator(); disable.disabled = !status.active || !isCoordinator();
+}
+
 function renderAll(logs = []) {
   $("instance-label").textContent = `当前实例 · ${overview.self_bot_id || "尚无群消息"}`; $("connection-text").textContent = overview.configured ? "工作台已连接" : "等待配置"; $("connection-dot").className = "dot " + (overview.configured ? "ok" : "error"); $("updated").textContent = `${time(Date.now() / 1000)} 更新`;
-  renderOverview(); renderControlDock(); renderScenes(); renderProjects(); renderMemory(); renderCollaboration(logs); renderInstanceSettings();
+  renderOverview(); renderControlDock(); renderComputerControl(); renderScenes(); renderProjects(); renderMemory(); renderCollaboration(logs); renderInstanceSettings();
   if (!overview.configured) showNotice("请先在“设置”中补齐群号、管理员、协调 Bot 和共享密钥。", "error"); else if ((workbench.health?.issues || []).length) showNotice("工作台可用，但体检发现待处理项。打开总览查看差异。", ""); else showNotice("", "ok");
 }
 
@@ -166,7 +174,7 @@ async function saveSettings(event) {
   event.preventDefault(); const form = new FormData(event.currentTarget); const feedback = $("settings-feedback"); const button = $("save-settings");
   try {
     const roster = String(form.get("bot_roster") || "{}").trim() || "{}"; const parsed = JSON.parse(roster); if (!parsed || Array.isArray(parsed) || typeof parsed !== "object") throw new Error("能力表须为 JSON 对象");
-    const data = { work_group_id: String(form.get("work_group_id") || "").trim(), owner_qq_id: String(form.get("owner_qq_id") || "").trim(), coordinator_bot_id: String(form.get("coordinator_bot_id") || "").trim(), bot_ids: String(form.get("bot_ids") || "").trim(), transport_mode: String(form.get("transport_mode") || "auto"), local_channel_dir: String(form.get("local_channel_dir") || "").trim(), workstation_dir: String(form.get("workstation_dir") || "").trim(), bot_roster: roster, task_store: String(form.get("task_store") || "").trim() };
+    const data = { work_group_id: String(form.get("work_group_id") || "").trim(), owner_qq_id: String(form.get("owner_qq_id") || "").trim(), coordinator_bot_id: String(form.get("coordinator_bot_id") || "").trim(), bot_ids: String(form.get("bot_ids") || "").trim(), transport_mode: String(form.get("transport_mode") || "auto"), local_channel_dir: String(form.get("local_channel_dir") || "").trim(), workstation_dir: String(form.get("workstation_dir") || "").trim(), computer_control_enabled: String(form.get("computer_control_enabled") || "false") === "true", computer_session_max_minutes: Number(form.get("computer_session_max_minutes") || 10), bot_roster: roster, task_store: String(form.get("task_store") || "").trim() };
     const secret = String(form.get("protocol_secret") || "").trim(); if (secret) data.protocol_secret = secret; button.disabled = true; feedback.textContent = "正在保存…"; const result = await bridge.apiPost("settings/save", data); if (!result?.saved) throw new Error("服务器未确认保存"); fillSettings(result.settings); feedback.textContent = result.settings?.task_store_restart_required ? "已保存；任务记录路径需重载插件后生效。" : "已保存并应用。"; await refresh();
   } catch (error) { feedback.textContent = "保存失败：" + (error?.message || "请检查输入"); } finally { button.disabled = false; }
 }
@@ -216,6 +224,8 @@ $("control-collab-on").addEventListener("click", () => controlAction("control.co
 $("control-collab-off").addEventListener("click", () => controlAction("control.collaboration", { enabled: false }, "多 Bot 协作已关闭。"));
 $("control-sync").addEventListener("click", () => controlAction("control.sync", {}, "场景、子代理、模型、强度、设置与在线状态已发起全量同步。"));
 $("channel-repair").addEventListener("click", () => controlAction("channel.repair", {}, "内部通道已自动修复；WG 协议不会发送到 QQ 群。"));
+$("computer-authorize").addEventListener("click", () => { if (!window.confirm("授权主要管理员在 10 分钟内使用 AstrBot CUA 沙箱？不会开放宿主机终端、Python 或任意路径写入。")) return; controlAction("computer.authorize", { minutes: 10 }, "安全电脑会话已授权 10 分钟。群内请使用 /电脑任务 具体操作。" ); });
+$("computer-disable").addEventListener("click", () => controlAction("computer.disable", {}, "安全电脑会话已立即关闭。"));
 $("control-persona").addEventListener("change", () => { const current = (workbench.instance_settings || []).find((item) => item.bot_id === overview.coordinator_id) || {}; controlAction("bot.settings", { bot_id: overview.coordinator_id, settings: { ...current, work_persona_mode: $("control-persona").value } }, "协调人格设置已更新。" ); });
 
 async function start() { bridge = window.AstrBotPluginView; if (!bridge) { showNotice("请从 AstrBot 管理面板的插件详情打开此视图。", "error"); return; } try { await bridge.ready(); await refresh(); window.setInterval(() => { if (!document.hidden) refresh(); }, 10000); } catch (error) { showNotice("插件视图连接失败：" + (error?.message || "未知错误"), "error"); } }

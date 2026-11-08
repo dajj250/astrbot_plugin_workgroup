@@ -16,5 +16,7 @@
   "task_timeout_sec": {"description": "子任务超时秒数，20 到 900", "type": "int", "default": 120},
   "max_attempts": {"description": "子任务最多尝试次数，1 到 5", "type": "int", "default": 3},
   "task_store": {"description": "本实例任务记录路径；留空使用 AstrBot 的 data/plugin_data/astrbot_plugin_workgroup/tasks.json", "type": "string", "default": ""},
-  "workstation_dir": {"description": "当前 AstrBot 实例的工作站文件夹绝对路径；留空关闭。协作模型只接收顶层文件名，不自动读写文件", "type": "string", "default": ""}
+  "workstation_dir": {"description": "当前 AstrBot 实例的工作站文件夹绝对路径；留空关闭。协作模型只接收顶层文件名，不自动读写文件", "type": "string", "default": ""},
+  "computer_control_enabled": {"description": "管理员安全电脑模式；仅主要管理员临时授权后可用 AstrBot CUA 沙箱", "type": "bool", "default": false, "hint": "不开放宿主机终端、Python 或任意路径文件写入；普通群成员、子代理和 WG 内部消息始终无权使用"},
+  "computer_session_max_minutes": {"description": "单次安全电脑会话最长分钟数，1 到 30", "type": "int", "default": 10}
 }

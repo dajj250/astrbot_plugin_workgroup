@@ -1,7 +1,7 @@
 name: astrbot_plugin_workgroup
 display_name: 多 Bot 场景工作台
 desc: 面向多 AstrBot 实例的场景、项目、派单、回执、交接记忆与体检工作台
-version: 1.2.1
+version: 1.2.2
 author: community
 repo: "https://github.com/dajj250/astrbot_plugin_workgroup"
 astrbot_version: ">=4.16,<5"
