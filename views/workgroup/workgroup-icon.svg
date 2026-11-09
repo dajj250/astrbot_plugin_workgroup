@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">多 Bot 场景工作台</title>
+  <desc id="desc">三个智能节点围绕工作核心协同运转</desc>
+  <defs>
+    <linearGradient id="frame" x1="28" y1="24" x2="226" y2="232" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#b8f5e5"/><stop offset=".48" stop-color="#66d9c0"/><stop offset="1" stop-color="#6b8cff"/>
+    </linearGradient>
+    <radialGradient id="space" cx=".34" cy=".2" r=".9">
+      <stop stop-color="#17354a"/><stop offset=".5" stop-color="#0a1824"/><stop offset="1" stop-color="#050b12"/>
+    </radialGradient>
+    <radialGradient id="core" cx=".36" cy=".28" r=".8">
+      <stop stop-color="#f6fffc"/><stop offset=".22" stop-color="#b8f5e5"/><stop offset=".58" stop-color="#42c7ad"/><stop offset="1" stop-color="#11665f"/>
+    </radialGradient>
+    <filter id="glow" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="clip"><rect x="8" y="8" width="240" height="240" rx="58"/></clipPath>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="58" fill="url(#space)" stroke="url(#frame)" stroke-width="7"/>
+  <g clip-path="url(#clip)" opacity=".2" stroke="#9cebd9" stroke-width="1">
+    <path d="M-8 58h272M-8 92h272M-8 126h272M-8 160h272M-8 194h272"/>
+    <path d="M50-8v272M84-8v272M118-8v272M152-8v272M186-8v272M220-8v272"/>
+  </g>
+  <ellipse cx="128" cy="128" rx="91" ry="57" fill="none" stroke="#67d9c2" stroke-width="4" opacity=".72" transform="rotate(-18 128 128)"/>
+  <ellipse cx="128" cy="128" rx="93" ry="58" fill="none" stroke="#7898ff" stroke-width="3" opacity=".5" transform="rotate(43 128 128)" stroke-dasharray="9 11"/>
+  <g stroke-linecap="round" stroke-width="7">
+    <path d="M73 76 115 111" stroke="#b8f5e5"/>
+    <path d="m185 82-45 32" stroke="#7fa5ff"/>
+    <path d="m126 147-15 52" stroke="#a8ef83"/>
+  </g>
+  <g filter="url(#glow)">
+    <path d="m128 87 37 21v42l-37 21-37-21v-42z" fill="#0c2630" stroke="url(#frame)" stroke-width="6"/>
+    <circle cx="128" cy="129" r="27" fill="url(#core)"/>
+  </g>
+  <path d="m109 116 9 27 10-18 10 18 9-27" fill="none" stroke="#062b2a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <g stroke="#07131d" stroke-width="7">
+    <g><circle cx="66" cy="70" r="22" fill="#b8f5e5"/><path d="M57 70h18M60 62v-5m12 5v-5" stroke="#153f46" stroke-width="5" stroke-linecap="round"/></g>
+    <g><circle cx="191" cy="76" r="22" fill="#7898ff"/><path d="M182 76h18M185 68v-5m12 5v-5" stroke="#15284b" stroke-width="5" stroke-linecap="round"/></g>
+    <g><circle cx="108" cy="206" r="22" fill="#a8ef83"/><path d="M99 206h18M102 198v-5m12 5v-5" stroke="#274627" stroke-width="5" stroke-linecap="round"/></g>
+  </g>
+  <circle cx="221" cy="43" r="7" fill="#f3fffb" filter="url(#glow)"/>
+</svg>

@@ -3,9 +3,71 @@ const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls)
 const STATUS_TEXT = { planning: "规划中", active: "进行中", blocked: "受阻", review: "待验收", done: "已完成", archived: "已归档", partial: "部分完成", running: "执行中", discussion: "讨论中", pending: "等待中", failed: "失败" };
 const ASSIGNMENTS = ["辅助协调", "画图", "编程 1", "编程 2", "资料检索", "文案写作", "数据分析", "测试复核"];
 const VIEW_META = {
-  overview: ["总览", "今天要推进什么？"], scenes: ["场景", "各司其职，不互相踩线"], projects: ["项目", "从需求到证据的推进台账"],
-  memory: ["记忆与交接", "换会话，也不会换掉上下文"], collaboration: ["协作记录", "派单、执行、回执、验收"], settings: ["设置", "连接工作群与成员实例"],
+  team: ["团队工位", "成员、任务与执行证据"],
+  overview: ["总览", "多 Bot 协作中枢"], scenes: ["场景", "各司其职，不互相踩线"], projects: ["项目", "从需求到证据的推进台账"],
+  memory: ["记忆与交接", "换会话，也不会换掉上下文"], collaboration: ["协作记录", "派单、执行、回执、验收"],
+  commands: ["命令手册", "查找并复制群命令"], settings: ["设置", "连接工作群与成员实例"],
 };
+const COMMANDS = [
+  ["工作与控制", [
+    ["/工作", "进入工作模式"], ["/聊天", "切换至休闲模式"],
+    ["@Bot /工作", "点名切换；@ 请在 QQ 中选择"], ["@Bot /聊天", "点名切换；协调 Bot 工作时成员跟随"],
+    ["/协作 开", "开启多 Bot 文本分工"], ["/协作 关", "关闭多 Bot 文本分工"], ["/协作 状态", "查询协作状态"],
+    ["/work start", "恢复"], ["/work stop", "暂停"], ["/work status", "查询模式及通道"], ["/work tasks", "查看近期任务"],
+  ]],
+  ["任务与产物", [
+    ["/任务 具体需求", "普通需求走文本分工；明确本机制作自动转协调 Bot 工具执行"], ["/本机任务 具体需求", "协调 Bot 调用原生本机工具"],
+    ["@Bot /本机任务 具体需求", "只点名一个成员，需启用本机执行且调用者为实例管理员"],
+    ["/自动制作 列表", "列出协调实例已登记的顺序制作流程"], ["/自动制作 memory-build", "按已登记的规则跨 Bot 顺序执行，最后尝试发 ZIP"],
+    ["/制作 列表", "列出协调实例的单步制作流程"], ["/制作 流程名", "协调实例执行已登记流程"],
+    ["/制作 1000000002 流程名", "指定成员代跑，成员流程须允许远程调用"],
+    ["/制作文档 md 具体需求", "生成 Markdown 文件"], ["/制作文档 txt 具体需求", "生成纯文本文件"],
+    ["/制作插件 具体需求", "生成 AstrBot 插件源码 ZIP"],
+  ]],
+  ["场景、项目与知识", [
+    ["/场景 列表", "查看场景"], ["/项目 列表", "查看项目"], ["/交接 场景ID 交接说明", "更新交接"],
+    ["/体检", "检查工作台配置和状态"],
+    ["/黑话 列表", "列出术语"], ["/黑话 添加 术语=含义", "添加术语"], ["/黑话 删除 术语", "删除术语"],
+    ["/知识库 列表", "列出知识"], ["/知识库 查询 关键词", "查询知识"],
+    ["/知识库 添加 标题=内容", "添加知识"], ["/知识库 删除 编号", "删除知识"],
+  ]],
+  ["电脑沙箱", [
+    ["/电脑 状态", "查看 CUA 会话状态"], ["/电脑 授权 10", "申请临时 CUA 会话"],
+    ["/电脑任务 具体操作", "调用已授权的 CUA 工具"], ["/电脑 关闭", "关闭 CUA 会话"],
+  ]],
+];
+
+function renderCommandReference() {
+  const grid = $("command-reference");
+  for (const [title, entries] of COMMANDS) {
+    const card = el("section", "card");
+    card.append(el("h2", "", title));
+    for (const [command, description] of entries) {
+      const row = el("div", "timeline-item");
+      const copy = el("button", "mini-button", "复制");
+      copy.type = "button";
+      copy.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(command);
+          copy.textContent = "已复制";
+        } catch {
+          const range = document.createRange();
+          range.selectNodeContents(code);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          copy.textContent = "请手动复制";
+        }
+      });
+      const code = el("code", "", command);
+      row.append(code, copy, el("small", "", description));
+      card.append(row);
+    }
+    grid.append(card);
+  }
+}
+
+renderCommandReference();
 let bridge = null;
 let overview = {};
 let workbench = { scenes: [], projects: [], receipts: [], audit: [], health: { issues: [], counts: {} }, integrations: {} };
@@ -14,6 +76,14 @@ let editorMode = null;
 let editorId = "";
 let editorAgentId = "";
 let loading = false;
+const renderedSections = new Map();
+let settingsLoaded = false;
+let downloadSettingsLoaded = false;
+function renderChanged(key, value, render) {
+  const signature = JSON.stringify(value);
+  if (renderedSections.get(key) === signature) return;
+  render(); renderedSections.set(key, signature);
+}
 
 function time(ts) {
   if (!Number(ts)) return "—";
@@ -157,11 +227,55 @@ function renderComputerControl() {
   if (status.active) { const remain = Math.max(1, Math.ceil((Number(status.expires_at || 0) - Date.now() / 1000) / 60)); note.textContent = `已授权，约剩 ${remain} 分钟；仅开放 ${status.runtime || "CUA 沙箱"}。`; }
   else note.textContent = status.enabled ? "功能已开启，当前等待主要管理员临时授权。" : "功能未开启；请先在设置中开启。";
   authorize.disabled = !status.enabled || !isCoordinator(); disable.disabled = !status.active || !isCoordinator();
+  const native = workbench.native_execution || {};
+  const toggle = $("native-execution-toggle");
+  toggle.textContent = native.enabled ? "关闭新任务" : "一键启用";
+  toggle.disabled = !overview.self_bot_id;
+  $("native-execution-status").textContent = native.enabled
+    ? "已启用 · 使用当前实例的 AstrBot 管理员权限"
+    : "已关闭 · 启用后管理员可从工作群调用本机工具";
+  $("native-execution-status").textContent += native.local_runtime
+    ? " · Local 已配置" : " · 请核对当前会话的 Local 配置";
+  $("native-execution-status").textContent += native.owner_listed
+    ? " · 群管理员已列入实例管理员名单" : " · 请核对 AstrBot 管理员名单";
+  $("native-execution-status").textContent += " · AstrBot 会话模型（账号由模型供应商插件管理）";
+  const timeline = $("native-execution-runs");
+  timeline.replaceChildren();
+  for (const run of native.runs || []) {
+    const row = el("div", "timeline-item", `${run.status} · ${run.id} · ${run.files} 个目录文件（含参考资料）`);
+    if (run.error) row.append(el("small", "", run.error));
+    for (const tool of (run.tools || []).slice(-20)) {
+      row.append(el("small", "", `${tool.name} · ${tool.status}${tool.ms == null ? "" : ` · ${tool.ms} ms`}`));
+    }
+    timeline.append(row);
+  }
+  if (!timeline.children.length) timeline.append(empty("暂无本机执行记录。"));
 }
 
 function renderAll(logs = []) {
   $("instance-label").textContent = `当前实例 · ${overview.self_bot_id || "尚无群消息"}`; $("connection-text").textContent = overview.configured ? "工作台已连接" : "等待配置"; $("connection-dot").className = "dot " + (overview.configured ? "ok" : "error"); $("updated").textContent = `${time(Date.now() / 1000)} 更新`;
-  renderOverview(); renderControlDock(); renderComputerControl(); renderScenes(); renderProjects(); renderMemory(); renderCollaboration(logs); renderInstanceSettings();
+  window.WorkgroupHalo?.update(overview, workbench);
+  window.WorkgroupTeam?.update(overview, workbench, () => go("scenes"));
+  if (!downloadSettingsLoaded) {
+    const downloadForm = $("download-settings-form");
+    downloadForm.elements.mode.value = workbench.download_settings?.mode || 'direct';
+    downloadForm.elements.proxy_url.value = workbench.download_settings?.proxy_url || '';
+    downloadSettingsLoaded = true;
+  }
+  const detectedProxy = workbench.download_settings?.detected_proxy_url || '';
+  const downloadMode = workbench.download_settings?.mode || 'direct';
+  $("download-settings-status").textContent = detectedProxy
+    ? `实时识别：${detectedProxy} · 当前模式：${downloadMode}`
+    : `未识别到本机 HTTP/HTTPS 代理 · 当前模式：${downloadMode}`;
+  renderChanged('overview', [workbench.health, workbench.scenes, workbench.projects, workbench.receipts, workbench.integrations, workbench.audit, workbench.diagnostics, overview.bots, overview.counts, overview.mode, overview.collaboration_enabled, overview.configured], renderOverview);
+  renderChanged('control', [overview, workbench.persona_mode, workbench.instance_settings], renderControlDock);
+  renderChanged('computer', [workbench.native_execution, workbench.computer_control, overview.self_bot_id, overview.coordinator_id], renderComputerControl);
+  const editingScene = document.activeElement?.closest('.agent-row');
+  if (!editingScene) renderChanged('scenes', [workbench.scenes, overview.bots, overview.self_bot_id, overview.coordinator_id], renderScenes);
+  renderChanged('projects', [workbench.projects, workbench.scenes, projectFilter], renderProjects);
+  renderChanged('memory', [workbench.memory, workbench.scenes, workbench.receipts], renderMemory);
+  renderChanged('collaboration', [logs, overview.tasks, overview.bots, overview.knowledge, workbench.audit, workbench.receipts], () => renderCollaboration(logs));
+  renderChanged('settings', [workbench.instance_settings, overview.bots, overview.self_bot_id], renderInstanceSettings);
   if (!overview.configured) showNotice("请先在“设置”中补齐群号、管理员、协调 Bot 和共享密钥。", "error"); else if ((workbench.health?.issues || []).length) showNotice("工作台可用，但体检发现待处理项。打开总览查看差异。", ""); else showNotice("", "ok");
 }
 
@@ -206,8 +320,8 @@ async function archiveProject(project) { if (!window.confirm(`将“${project.na
 
 async function refresh() {
   if (!bridge || loading) return; loading = true; $("refresh").disabled = true;
-  try { const [overviewData, workbenchData, logs, settings] = await Promise.all([bridge.apiGet("overview"), bridge.apiGet("workbench"), bridge.apiGet("logs"), bridge.apiGet("settings")]); overview = overviewData || {}; workbench = workbenchData || workbench; fillSettings(settings || {}); renderAll(logs?.items || []); }
-  catch (error) { showNotice("读取工作台失败：" + (error?.message || "未知错误"), "error"); $("connection-dot").className = "dot error"; }
+  try { const [overviewData, workbenchData, logs, settings] = await Promise.all([bridge.apiGet("overview"), bridge.apiGet("workbench"), bridge.apiGet("logs"), bridge.apiGet("settings")]); overview = overviewData || {}; workbench = workbenchData || workbench; if (!settingsLoaded) { fillSettings(settings || {}); settingsLoaded = true; } renderAll(logs?.items || []); }
+  catch (error) { window.WorkgroupHalo?.disconnect(); showNotice("读取工作台失败：" + (error?.message || "未知错误"), "error"); $("connection-dot").className = "dot error"; }
   finally { loading = false; $("refresh").disabled = false; }
 }
 
@@ -215,7 +329,6 @@ for (const button of document.querySelectorAll("[data-view]")) button.addEventLi
 for (const button of document.querySelectorAll("[data-go]")) button.addEventListener("click", () => go(button.dataset.go));
 for (const button of document.querySelectorAll("[data-project-filter]")) button.addEventListener("click", () => { projectFilter = button.dataset.projectFilter; for (const other of document.querySelectorAll("[data-project-filter]")) other.classList.toggle("active", other === button); renderProjects(); });
 $("new-scene").addEventListener("click", () => openSceneEditor()); $("new-project").addEventListener("click", () => openProjectEditor()); $("editor-close").addEventListener("click", () => $("editor-dialog").close()); $("editor-cancel").addEventListener("click", () => $("editor-dialog").close()); $("editor-form").addEventListener("submit", submitEditor); $("settings-form").addEventListener("submit", saveSettings); $("refresh").addEventListener("click", refresh);
-$("health-run").addEventListener("click", async () => { try { const result = await bridge.apiPost("workbench/action", { action: "health.run", data: {} }); workbench = result.workbench; renderAll(); showNotice("体检已完成；结果已刷新。", "ok"); } catch (error) { showNotice("体检失败：" + (error?.message || "未知错误"), "error"); } });
 $("diagnostics-run").addEventListener("click", async () => { const button = $("diagnostics-run"); button.disabled = true; button.textContent = "检测中…"; showNotice("正在检测模型、QQ 登录和内部通道；最多约 45 秒。", ""); try { const response = await bridge.apiPost("workbench/action", { action: "diagnostics.run", data: {} }); if (!response?.saved) throw new Error("服务器未确认"); workbench = response.workbench || workbench; await refresh(); renderDiagnostics(response.result); const failed = Number(response.result?.failed || 0); const warnings = Number(response.result?.warnings || 0); showNotice(`完整检测结束：${failed} 项失败，${warnings} 项提醒。`, failed ? "error" : warnings ? "" : "ok"); } catch (error) { showNotice("完整检测失败：" + (error?.message || "未知错误"), "error"); } finally { button.disabled = false; button.textContent = "一键完成检测"; } });
 async function controlAction(action, data, message) { try { const result = await bridge.apiPost("workbench/action", { action, data }); if (!result?.saved) throw new Error("服务器未确认"); workbench = result.workbench; await refresh(); showNotice(message, "ok"); } catch (error) { showNotice("操作失败：" + (error?.message || "未知错误"), "error"); } }
 $("control-mode-work").addEventListener("click", () => controlAction("control.mode", { mode: "work" }, "已切换全群到工作模式。"));
@@ -226,7 +339,23 @@ $("control-sync").addEventListener("click", () => controlAction("control.sync", 
 $("channel-repair").addEventListener("click", () => controlAction("channel.repair", {}, "内部通道已自动修复；WG 协议不会发送到 QQ 群。"));
 $("computer-authorize").addEventListener("click", () => { if (!window.confirm("授权主要管理员在 10 分钟内使用 AstrBot CUA 沙箱？不会开放宿主机终端、Python 或任意路径写入。")) return; controlAction("computer.authorize", { minutes: 10 }, "安全电脑会话已授权 10 分钟。群内请使用 /电脑任务 具体操作。" ); });
 $("computer-disable").addEventListener("click", () => controlAction("computer.disable", {}, "安全电脑会话已立即关闭。"));
+$("native-execution-toggle").addEventListener("click", () => {
+  const enabled = !workbench.native_execution?.enabled;
+  if (enabled && !window.confirm("允许工作群管理员使用当前实例的 AstrBot 本机工具？")) return;
+  controlAction("native.execution", { enabled }, enabled ? "本机任务入口已启用。" : "已关闭新的本机任务。");
+});
 $("control-persona").addEventListener("change", () => { const current = (workbench.instance_settings || []).find((item) => item.bot_id === overview.coordinator_id) || {}; controlAction("bot.settings", { bot_id: overview.coordinator_id, settings: { ...current, work_persona_mode: $("control-persona").value } }, "协调人格设置已更新。" ); });
 
-async function start() { bridge = window.AstrBotPluginView; if (!bridge) { showNotice("请从 AstrBot 管理面板的插件详情打开此视图。", "error"); return; } try { await bridge.ready(); await refresh(); window.setInterval(() => { if (!document.hidden) refresh(); }, 10000); } catch (error) { showNotice("插件视图连接失败：" + (error?.message || "未知错误"), "error"); } }
+async function start() { bridge = window.AstrBotPluginView; if (!bridge) { showNotice("请从 AstrBot 管理面板的插件详情打开此视图。", "error"); return; } try { await bridge.ready(); await refresh(); window.setInterval(() => { if (!document.hidden) refresh(); }, 2500); } catch (error) { showNotice("插件视图连接失败：" + (error?.message || "未知错误"), "error"); } }
 start();
+
+$("download-settings-form").addEventListener("submit", async event => {
+  event.preventDefault();
+  const form = event.currentTarget, button = form.querySelector('button'); button.disabled = true;
+  try {
+    const result = await bridge.apiPost('workbench/action', {action:'native.download',data:{mode:form.elements.mode.value,proxy_url:form.elements.proxy_url.value.trim()}});
+    if (!result?.saved) throw Error('服务器未确认保存');
+    workbench = result.workbench; downloadSettingsLoaded = false; renderAll();
+  } catch(error) { $("download-settings-status").textContent='保存失败：'+error.message; }
+  finally { button.disabled = false; }
+});

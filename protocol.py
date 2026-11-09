@@ -13,7 +13,7 @@ PREFIX = "[WG] "
 TYPES = {"task", "claim", "result", "error", "cancel", "hello", "proposal", "opinion",
          "glossary", "knowledge", "effort_sync", "mode_sync", "collaboration_sync",
          "scene_sync", "scene_update", "agent_sync", "agent_update",
-         "settings_sync", "settings_update", "sync_request", "status_sync"}
+         "settings_sync", "settings_update", "sync_request", "status_sync", "production_run", "production_result"}
 MAX_WIRE_BYTES = 12000
 MAX_AGE_SECONDS = 900
 

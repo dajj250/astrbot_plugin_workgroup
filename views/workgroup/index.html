@@ -5,19 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <title>场景工作台</title>
-  <link rel="stylesheet" href="./style.css">
-  <script src="./app.js" defer></script>
+  <link rel="icon" href="./workgroup-icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./style.css?v=1.3.1-theme1">
+  <script src="./live-halo.js?v=1.3.1-theme1" defer></script>
+  <script src="./team-board.js?v=1.3.1" defer></script>
+  <script src="./app.js?v=1.3.1-proxy1" defer></script>
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="brand"><span class="brand-glyph">工</span><div><strong>场景工作台</strong><small>ASTRBOT WORKGROUP</small></div></div>
+      <div class="brand"><span class="brand-glyph" aria-hidden="true"><svg viewBox="0 0 64 64"><defs><linearGradient id="brand-ring" x1="8" y1="8" x2="56" y2="56"><stop stop-color="#b8f5e5"/><stop offset="1" stop-color="#67a7ff"/></linearGradient><radialGradient id="brand-core"><stop stop-color="#f5fff9"/><stop offset=".35" stop-color="#99e3d0"/><stop offset="1" stop-color="#2e766b"/></radialGradient></defs><rect width="64" height="64" rx="17" fill="#0b1520"/><circle cx="32" cy="32" r="21" fill="none" stroke="#253d50" stroke-width="2"/><path d="M13 38c3 12 16 18 27 14 12-4 17-17 12-28C47 13 33 9 22 15" fill="none" stroke="url(#brand-ring)" stroke-width="3.2" stroke-linecap="round"/><path d="M20 22 31 31m13-7-11 7m-1 2-7 13" stroke="#79bcb0" stroke-width="2" stroke-linecap="round"/><circle cx="32" cy="32" r="7.5" fill="url(#brand-core)"/><circle cx="19" cy="20" r="5" fill="#b8f5e5" stroke="#0b1520" stroke-width="2"/><circle cx="46" cy="22" r="5" fill="#67a7ff" stroke="#0b1520" stroke-width="2"/><circle cx="24" cy="48" r="5" fill="#d4ff8b" stroke="#0b1520" stroke-width="2"/></svg></span><div><strong>场景工作台</strong><small>ASTRBOT WORKGROUP</small></div></div>
       <nav aria-label="工作台导航">
         <button class="nav-item active" data-view="overview"><span>⌂</span>总览</button>
+        <button class="nav-item" data-view="team"><span>▦</span>团队工位</button>
         <button class="nav-item" data-view="scenes"><span>◫</span>场景</button>
         <button class="nav-item" data-view="projects"><span>◇</span>项目</button>
         <button class="nav-item" data-view="memory"><span>≋</span>记忆与交接</button>
         <button class="nav-item" data-view="collaboration"><span>◎</span>协作记录</button>
+        <button class="nav-item" data-view="commands"><span>⌘</span>命令手册</button>
         <button class="nav-item" data-view="settings"><span>⚙</span>设置</button>
       </nav>
       <div class="sidebar-foot"><div><span id="connection-dot" class="dot"></span><span id="connection-text">正在连接</span></div><small id="instance-label">当前实例 · —</small></div>
@@ -30,10 +35,27 @@
       <div id="notice" class="notice">正在读取工作台…</div>
 
       <section class="view active" data-page="overview">
+        <section class="halo-console" aria-label="节拍驱动协作光场">
+          <iframe id="halo-visual" src="./halo.html?v=1.3.1-theme2" title="HALOFLUX 节拍驱动协作光场" loading="eager"></iframe>
+          <div class="halo-heading"><span>WORKGROUP / BEAT-DRIVEN LIGHT FIELD</span><h2>实时协作 · 光场核心</h2><div class="halo-controls"><label for="halo-fps">帧率 <select id="halo-fps" aria-label="光环目标帧率"><option value="30">30 FPS</option><option value="45">45 FPS</option><option value="60" selected>60 FPS</option><option value="90">90 FPS</option><option value="120">120 FPS</option></select></label><output id="halo-fps-readout" for="halo-fps">实际 — FPS</output><button id="halo-style-toggle" type="button" aria-expanded="false" aria-controls="halo-style-panel">动画设置</button><button id="halo-visual-toggle" type="button" aria-pressed="false">暂停光场</button></div><p id="halo-live-status">等待真实执行事件</p></div>
+          <aside id="halo-style-panel" class="halo-style-panel" aria-label="HALOFLUX 动画设置" hidden><div class="halo-style-head"><div><b>HALOFLUX 动画设置</b><small>节拍驱动光场 · 设置仅保存在当前浏览器</small></div><button id="halo-style-close" type="button" aria-label="关闭动画设置">×</button></div><label>视觉预设<select id="halo-theme-preset"><option value="mint">薄荷协作</option><option value="ocean">深海蓝</option><option value="neon">霓虹紫</option><option value="gold">暖金</option><option value="custom">自定义</option></select></label><div class="halo-color-grid"><label>背景色<input id="halo-bg-color" type="color" value="#08111d"></label><label>文字色<input id="halo-text-color" type="color" value="#f1f7fc"></label><label>光场色<input id="halo-glow-color" type="color" value="#99e3d0"></label><label>强调色<input id="halo-accent-color" type="color" value="#67a7ff"></label></div><label>柔光强度 <output id="halo-glow-value">100%</output><input id="halo-glow-strength" type="range" min="0" max="200" step="5" value="100"></label><label>淡入速度<select id="halo-fade-speed"><option value="0">关闭淡入</option><option value="300">快速 · 0.3 秒</option><option value="700" selected>自然 · 0.7 秒</option><option value="1200">柔和 · 1.2 秒</option><option value="2000">缓慢 · 2 秒</option></select></label><div class="halo-music-settings"><div><b>背景音乐</b><small>Synthwave 421k · CC0</small></div><button id="halo-music-toggle" type="button" aria-pressed="false">播放音乐</button><label>音量 <output id="halo-volume-value">35%</output><input id="halo-music-volume" type="range" min="0" max="100" step="1" value="35"></label></div><button id="halo-style-reset" class="halo-style-reset" type="button">恢复默认外观</button></aside>
+          <div class="halo-stats" id="halo-stats"></div>
+          <div class="halo-bottom"><div class="halo-flow"><b>文件读写通道</b><small>观测到的文件 ↔ 执行器 I/O；不代表文件间复制</small><div id="halo-file-flow"></div></div><div class="halo-feed"><b>真实工具事件</b><div id="halo-event-feed"></div></div></div>
+          <div class="halo-credit">基于 <a href="https://github.com/Ryder191/haloflux" target="_blank" rel="noopener">HALOFLUX by Ryder191</a> 修改 · 仅限非商业使用 · 音乐 Synthwave 421k / The Cynic Project（CC0）</div>
+        </section>
         <details class="usage-guide" open><summary><span><b>第一次使用？</b> 按这四步完成场景工作台</span><span>收起提示</span></summary><div class="guide-steps"><div><i>1</i><span><b>建场景栏</b><small>绑定主 Bot，填写负责什么与不碰什么。</small></span></div><div><i>2</i><span><b>核对代理栏</b><small>AstrBot 子代理会本机自动同步，也可手动添加。</small></span></div><div><i>3</i><span><b>调两套强度</b><small>分别选择工作时、休闲时的思考投入。</small></span></div><div><i>4</i><span><b>发 /任务 并体检</b><small>项目、派单、回执和证据会自动入栏。</small></span></div></div><div id="integration-status" class="integration-status"></div></details>
-        <section class="control-dock"><div class="control-title"><span class="pulse"></span><div><b>协调操作栏</b><small id="control-role-note">正在识别控制权限</small></div></div><div class="control-group"><span>全群模式</span><div class="segmented"><button id="control-mode-work">工作</button><button id="control-mode-chat">休闲</button></div></div><div class="control-group"><span>多 Bot 协作</span><div class="segmented"><button id="control-collab-on">开启</button><button id="control-collab-off">关闭</button></div></div><div class="control-group"><span>协调人格</span><select id="control-persona"><option value="clean">去人格工作</option><option value="preserve">保留人格工作</option></select></div><button id="control-sync" class="dock-button">同步工作区</button><button id="channel-repair" class="dock-button">一键修复内部通道</button><button id="health-run" class="dock-button ghost">运行体检</button></section>
+        <section class="control-dock"><div class="control-title"><span class="pulse"></span><div><b>协调操作栏</b><small id="control-role-note">正在识别控制权限</small></div></div><div class="control-group"><span>全群模式</span><div class="segmented"><button id="control-mode-work">工作</button><button id="control-mode-chat">休闲</button></div></div><div class="control-group"><span>多 Bot 协作</span><div class="segmented"><button id="control-collab-on">开启</button><button id="control-collab-off">关闭</button></div></div><div class="control-group"><span>协调人格</span><select id="control-persona"><option value="clean">去人格工作</option><option value="preserve">保留人格工作</option></select></div><button id="control-sync" class="dock-button">同步工作区</button><button id="channel-repair" class="dock-button">一键修复内部通道</button></section>
         <section class="diagnostic-panel"><div><b>完整环境检测</b><small>检查 QQ 登录、内部通道、模型供应商、任务审核和插件联动；模型测试会使用少量 Token。</small></div><button id="diagnostics-run" class="dock-button">一键完成检测</button></section><div id="diagnostic-results" class="diagnostic-results"></div>
         <section class="diagnostic-panel"><div><b>管理员安全电脑模式</b><small id="computer-status">默认关闭；仅主要管理员可临时使用 AstrBot CUA 沙箱。</small></div><div class="segmented"><button id="computer-authorize" class="dock-button">授权 10 分钟</button><button id="computer-disable" class="dock-button ghost">立即关闭</button></div></section>
+        <section class="card">
+          <div class="card-head">
+            <div><span class="kicker">LOCAL EXECUTION</span><h2>本机执行</h2><p id="native-execution-status">正在读取当前实例状态</p></div>
+            <button id="native-execution-toggle" class="dock-button">一键启用</button>
+          </div>
+          <p>工作群主要管理员用 <code>/本机任务 具体需求</code> 发起。指定成员时请使用 QQ 的 @。</p>
+          <form id="download-settings-form" class="download-settings"><label>下载通道<select name="mode"><option value="detect">实时识别代理</option><option value="auto">实时识别代理，失败后直连</option><option value="proxy">手动指定代理</option><option value="direct">直接连接</option></select></label><label>手动代理地址（可留空）<input name="proxy_url" type="url" placeholder="http://127.0.0.1:7890" autocomplete="off"></label><button type="submit" class="dock-button">保存下载通道</button><small id="download-settings-status">正在识别本机 HTTP/HTTPS 代理；不会修改系统代理。</small></form>
+          <div id="native-execution-runs" class="timeline"></div>
+        </section>
         <div class="status-strip"><div><span class="pulse"></span><strong id="system-status">读取中</strong><small id="system-detail">正在检查配置和协作通道</small></div><div class="mode-chip" id="mode-chip">—</div></div>
         <div class="metric-grid">
           <article><span>活跃场景</span><strong id="metric-scenes">—</strong><small>各自有职责与边界</small></article>
@@ -49,6 +71,12 @@
         </div>
       </section>
 
+      <section class="view" data-page="team">
+        <div class="team-banner"><div><span class="kicker">TEAM CONTROL</span><h2>每一份工作，都有迹可循</h2><p>成员工位与任务阶段来自工作台真实记录，每 2.5 秒轮询。其他实例的本机工具事件暂不汇总。</p></div><strong id="team-attention">等待数据</strong></div>
+        <div class="page-actions"><label>搜索任务、Bot 或工具<input id="team-search" type="search" placeholder="输入关键词筛选" autocomplete="off"></label><button id="team-export">导出执行快照</button></div>
+        <div id="team-kanban" class="team-kanban"></div>
+        <div class="page-intro"><h2>成员工位</h2><p>配置模型不代表本轮实际模型；执行状态与 QQ 登录状态分别展示。</p></div><div id="team-desks" class="team-desks"></div>
+      </section>
       <section class="view" data-page="scenes"><div class="page-actions"><p>一个 Bot 对应一个工作场景。职责、边界和口吻都在这里维护。</p><button id="new-scene">＋ 新建场景</button></div><div id="scene-list" class="scene-grid full"></div></section>
 
       <section class="view" data-page="projects"><div class="page-actions"><div class="segmented"><button class="active" data-project-filter="open">进行中</button><button data-project-filter="done">已完成</button><button data-project-filter="archived">归档</button><button data-project-filter="all">全部</button></div><button id="new-project">＋ 新建项目</button></div><div id="project-list" class="project-list full"></div></section>
@@ -60,6 +88,10 @@
         <div class="dashboard-grid two"><section class="card"><div class="card-head"><div><span class="kicker">TASK FLOW</span><h2>任务与子任务</h2></div></div><div id="task-list" class="task-list"></div></section><section class="card"><div class="card-head"><div><span class="kicker">RECEIPTS</span><h2>回执台账</h2></div></div><div id="receipt-list" class="receipt-list"></div></section><section class="card"><div class="card-head"><div><span class="kicker">KNOWLEDGE</span><h2>共享知识</h2></div></div><div id="knowledge-list" class="plain-list"></div></section><section class="card"><div class="card-head"><div><span class="kicker">LOGS</span><h2>运行日志</h2></div></div><div id="log-list" class="plain-list logs"></div></section></div>
       </section>
 
+      <section class="view" data-page="commands">
+        <div class="page-intro"><span class="kicker">COMMANDS</span><h2>工作群命令手册</h2><p>复制命令后替换示例参数。指定 Bot 时，请在 QQ 中使用真实 @。</p></div>
+        <div id="command-reference" class="dashboard-grid two"></div>
+      </section>
       <section class="view" data-page="settings">
         <section class="settings-card instance-card"><div class="card-head"><div><span class="kicker">INSTANCE CONTROL</span><h2>Bot 公开运行设置</h2><p>协调 Bot 可控制所有实例；成员只能修改自己。密钥、路径与私有交接不会同步。</p></div></div><div id="instance-settings-list" class="instance-settings-list"></div></section>
         <form id="settings-form" class="settings-card" autocomplete="off">
@@ -67,7 +99,7 @@
           <div class="settings-grid">
             <label>工作群 QQ 群号<input name="work_group_id" inputmode="numeric"></label><label>主要管理员 QQ 号<input name="owner_qq_id" inputmode="numeric"></label><label>协调 Bot QQ 号<input name="coordinator_bot_id" inputmode="numeric"></label><label>允许加入的 Bot<input name="bot_ids" placeholder="逗号分隔；可留空"></label>
             <label>内部传输方式<select name="transport_mode"><option value="auto">自动内部通道（推荐）</option><option value="local">强制本机内部通道</option></select><small>WG 协议不会发送到 QQ 群。</small></label>
-            <label class="wide">本机共享通道目录<input name="local_channel_dir" placeholder="三个实例必须填写同一个绝对路径"><small>例如 C:\Users\用户名\Desktop\工作区\astrbot_workgroup_channel</small></label><label class="wide">工作站文件夹<input name="workstation_dir" placeholder="可选：只读取顶层文件名作为背景"></label>
+            <label class="wide">本机共享通道目录<input name="local_channel_dir" placeholder="三个实例必须填写同一个绝对路径"><small>例如 D:\AstrBot\shared\workgroup_channel</small></label><label class="wide">工作站文件夹<input name="workstation_dir" placeholder="可选：只读取顶层文件名作为背景"></label>
             <label>安全电脑模式<select name="computer_control_enabled"><option value="false">关闭（推荐默认）</option><option value="true">开启管理员临时授权</option></select><small>仅 CUA 沙箱；不开放宿主机终端、Python 或任意路径写入。</small></label><label>单次最长授权<select name="computer_session_max_minutes"><option value="5">5 分钟</option><option value="10">10 分钟</option><option value="15">15 分钟</option><option value="30">30 分钟</option></select></label>
             <label class="wide">Bot 能力表 JSON<textarea name="bot_roster" rows="7" spellcheck="false">{}</textarea></label><label class="wide">任务记录路径<input name="task_store" placeholder="留空使用 AstrBot 默认路径"></label><label class="wide">共享密钥<input name="protocol_secret" type="password" autocomplete="new-password" placeholder="留空保持已有密钥"><small id="secret-state"></small></label>
           </div><div id="settings-feedback" class="form-feedback">尚未保存。</div>
@@ -75,6 +107,7 @@
       </section>
     </main>
   </div>
+  <dialog id="team-detail"><div class="dialog-head"><h2 id="team-detail-title">执行详情</h2><button id="team-detail-close" type="button">关闭</button></div><div id="team-detail-body"></div></dialog>
   <dialog id="editor-dialog"><form id="editor-form" method="dialog"><div class="dialog-head"><div><span id="editor-kicker" class="kicker">EDIT</span><h2 id="editor-title">编辑</h2></div><button type="button" id="editor-close" class="icon-button">×</button></div><div id="editor-fields" class="editor-fields"></div><div class="dialog-actions"><span id="editor-feedback"></span><button type="button" id="editor-cancel" class="ghost">取消</button><button type="submit">保存</button></div></form></dialog>
 </body>
 </html>
